@@ -7,8 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- html2pdf.js for PDF export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { font-family: 'Inter', sans-serif; }
         body { background: #f4f2ef; }
@@ -21,67 +20,7 @@
         ::-webkit-scrollbar-thumb { background: #b4533b; border-radius: 8px; }
         .card-hover:hover { transform: translateY(-2px); transition: all 0.2s ease; box-shadow: 0 12px 20px -12px rgba(0,0,0,0.1); }
         .week-cell {
-            min-width: 100px;
-        }
-        /* PDF export specific styles - clean and professional */
-        .pdf-export-container {
-            padding: 20px;
-            background: white;
-            font-family: 'Inter', sans-serif;
-        }
-        .pdf-header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #b4533b;
-            padding-bottom: 15px;
-        }
-        .pdf-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #292524;
-        }
-        .pdf-subtitle {
-            font-size: 14px;
-            color: #57534e;
-            margin-top: 5px;
-        }
-        .pdf-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 12px;
-        }
-        .pdf-table th {
-            background: #f5f5f4;
-            border: 1px solid #d6d3d1;
-            padding: 10px;
-            font-weight: 600;
-            text-align: center;
-        }
-        .pdf-table td {
-            border: 1px solid #d6d3d1;
-            padding: 8px;
-            text-align: center;
-        }
-        .pdf-table td:first-child {
-            text-align: left;
-            font-weight: 500;
-        }
-        .pdf-footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 10px;
-            color: #78716c;
-            border-top: 1px solid #e7e5e4;
-            padding-top: 15px;
-        }
-        .pdf-month-total {
-            font-weight: bold;
-            background: #fef3c7;
-            margin-top: 15px;
-            padding: 10px;
-            text-align: center;
-            border-radius: 8px;
+            min-width: 95px;
         }
         .export-loading {
             position: fixed;
@@ -98,17 +37,22 @@
             gap: 12px;
             font-weight: 500;
         }
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e5e7eb;
+        }
     </style>
 </head>
 <body class="brick-pattern-bg antialiased">
 
-    <!-- Loading overlay -->
     <div id="exportLoading" class="export-loading">
         <i class="fa-solid fa-spinner fa-spin text-amber-700 text-xl"></i>
         <span>Generating PDF report...</span>
     </div>
 
-    <div class="max-w-[1800px] mx-auto px-4 md:px-6 py-6 md:py-8">
+    <div class="max-w-[1400px] mx-auto px-4 md:px-6 py-6 md:py-8">
         <!-- HEADER -->
         <div class="flex flex-wrap justify-between items-center mb-8 border-b border-orange-800/20 pb-4">
             <div>
@@ -125,16 +69,14 @@
 
         <!-- Action Panels -->
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Add Analyst Card -->
             <div class="bg-white rounded-2xl shadow-md p-5 border-l-8 border-l-amber-700 card-hover">
                 <h2 class="font-semibold text-lg flex items-center gap-2 text-stone-800"><i class="fa-solid fa-user-plus text-amber-700"></i> Add Analyst</h2>
                 <div class="mt-3 flex flex-col gap-2">
                     <input type="text" id="newAnalystName" placeholder="Analyst full name" class="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 outline-none">
-                    <button id="addAnalystBtn" class="bg-amber-800 hover:bg-amber-900 text-white px-5 py-2 rounded-xl font-medium transition flex items-center justify-center gap-2"><i class="fa-solid fa-plus"></i> Add</button>
+                    <button id="addAnalystBtn" class="bg-amber-800 hover:bg-amber-900 text-white px-5 py-2 rounded-xl font-medium transition flex items-center justify-center gap-2"><i class="fa-solid fa-plus"></i> Add Analyst</button>
                 </div>
             </div>
 
-            <!-- Remove Analyst Card -->
             <div class="bg-white rounded-2xl shadow-md p-5 border-l-8 border-l-red-700 card-hover">
                 <h2 class="font-semibold text-lg flex items-center gap-2 text-stone-800"><i class="fa-solid fa-user-minus text-red-600"></i> Remove Analyst</h2>
                 <div class="mt-3 flex flex-col gap-2">
@@ -146,7 +88,6 @@
                 <p class="text-xs text-stone-400 mt-2">* Removes analyst and all their tickets</p>
             </div>
 
-            <!-- Add Tickets Card -->
             <div class="bg-white rounded-2xl shadow-md p-5 border-l-8 border-l-emerald-700 card-hover">
                 <h2 class="font-semibold text-lg flex items-center gap-2 text-stone-800"><i class="fa-solid fa-ticket-alt text-emerald-700"></i> Add Tickets</h2>
                 <div class="grid grid-cols-2 gap-2 mt-2">
@@ -177,7 +118,6 @@
                 <p class="text-xs text-stone-400 mt-1">* Tickets added to the first week of selected month</p>
             </div>
 
-            <!-- Month Manager Card (with PDF Export) -->
             <div class="bg-white rounded-2xl shadow-md p-5 border-l-8 border-l-sky-700 card-hover">
                 <h2 class="font-semibold text-lg flex items-center gap-2 text-stone-800"><i class="fa-regular fa-calendar-plus"></i> Month Manager</h2>
                 <div class="flex flex-col gap-2 mt-2">
@@ -196,8 +136,8 @@
             </div>
         </div>
 
-        <!-- JD Edwards Table -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-stone-200 mb-8" id="jdeTableContainer">
+        <!-- JD Edwards Table - ONLY 4 WEEKS -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-stone-200 mb-8">
             <div class="bg-amber-900/10 px-5 py-4 border-b border-amber-200">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-database text-amber-800 text-xl"></i>
@@ -209,12 +149,12 @@
                 <table class="min-w-full text-sm" id="jdeTable">
                     <thead class="bg-stone-100 text-stone-700">
                         <tr>
-                            <th class="px-4 py-3 text-left font-semibold">Analyst</th>
+                            <th class="px-4 py-3 text-left font-semibold w-32">Analyst</th>
                             <th class="px-3 py-3 text-center font-semibold week-cell">Week 1<br><span class="text-xs font-normal">(GG | BWS)</span></th>
                             <th class="px-3 py-3 text-center font-semibold week-cell">Week 2<br><span class="text-xs font-normal">(GG | BWS)</span></th>
                             <th class="px-3 py-3 text-center font-semibold week-cell">Week 3<br><span class="text-xs font-normal">(GG | BWS)</span></th>
                             <th class="px-3 py-3 text-center font-semibold week-cell">Week 4<br><span class="text-xs font-normal">(GG | BWS)</span></th>
-                            <th class="px-3 py-3 text-center font-semibold">Weekly Total</th>
+                            <th class="px-3 py-3 text-center font-semibold w-24">Weekly Total</th>
                             <th class="px-3 py-3 text-center font-semibold w-20">Actions</th>
                         </tr>
                     </thead>
@@ -228,8 +168,8 @@
             </div>
         </div>
 
-        <!-- SalesForce Table -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-stone-200" id="sfTableContainer">
+        <!-- SalesForce Table - ONLY 4 WEEKS -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-stone-200">
             <div class="bg-sky-900/10 px-5 py-4 border-b border-sky-200">
                 <div class="flex items-center gap-2">
                     <i class="fa-brands fa-salesforce text-sky-700 text-xl"></i>
@@ -241,12 +181,12 @@
                 <table class="min-w-full text-sm" id="sfTable">
                     <thead class="bg-stone-100 text-stone-700">
                         <tr>
-                            <th class="px-4 py-3 text-left font-semibold">Analyst</th>
+                            <th class="px-4 py-3 text-left font-semibold w-32">Analyst</th>
                             <th class="px-3 py-3 text-center font-semibold week-cell">Week 1<br><span class="text-xs font-normal">(GG | BWS)</span></th>
                             <th class="px-3 py-3 text-center font-semibold week-cell">Week 2<br><span class="text-xs font-normal">(GG | BWS)</span></th>
                             <th class="px-3 py-3 text-center font-semibold week-cell">Week 3<br><span class="text-xs font-normal">(GG | BWS)</span></th>
                             <th class="px-3 py-3 text-center font-semibold week-cell">Week 4<br><span class="text-xs font-normal">(GG | BWS)</span></th>
-                            <th class="px-3 py-3 text-center font-semibold">Weekly Total</th>
+                            <th class="px-3 py-3 text-center font-semibold w-24">Weekly Total</th>
                             <th class="px-3 py-3 text-center font-semibold w-20">Actions</th>
                         </tr>
                     </thead>
@@ -261,7 +201,7 @@
         </div>
         
         <div class="mt-6 text-center text-xs text-stone-500 bg-stone-100/70 rounded-xl py-2 px-4">
-            📊 Week 1 = 1st, Week 2 = 8th, Week 3 = 15th, Week 4 = 22nd of month | Data persists in browser | Use PDF export to generate professional reports
+            📊 Week 1 = 1st, Week 2 = 8th, Week 3 = 15th, Week 4 = 22nd of month | Data persists in browser | Use the delete button to remove all tickets for an analyst in the current month
         </div>
     </div>
 
@@ -273,6 +213,14 @@
         let currentMonth = "";
 
         const weekLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+        
+        // Format month for display correctly
+        function formatMonthDisplay(monthId) {
+            if (!monthId) return monthId;
+            const [year, month] = monthId.split('-').map(Number);
+            const date = new Date(year, month - 1, 1);
+            return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+        }
         
         function initDefaultData() {
             if(monthsList.length === 0) {
@@ -395,6 +343,19 @@
             }
         }
 
+        function updateRemoveAnalystDropdown() {
+            const removeSelect = document.getElementById('removeAnalystSelect');
+            if(removeSelect) {
+                removeSelect.innerHTML = '<option value="">-- Select analyst to remove --</option>';
+                globalAnalysts.forEach(an => {
+                    const opt = document.createElement('option');
+                    opt.value = an;
+                    opt.textContent = an;
+                    removeSelect.appendChild(opt);
+                });
+            }
+        }
+
         function renderTables() {
             if(!currentMonth) return;
             
@@ -410,9 +371,9 @@
                 
                 if(analystList.length === 0) {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td colspan="7" class="text-center py-8 text-stone-400">No analysts added. Click "Add Analyst" to start tracking.</td>`;
+                    tr.innerHTML = `<td colspan="7" class="text-center py-8 text-stone-400">No analysts added. Click "Add Analyst" to start tracking.`;
                     tbody.appendChild(tr);
-                    document.getElementById(footerId).innerHTML = `<td colspan="7" class="px-4 py-2">Month Total: GG: 0 | BWS: 0 | ALL: 0</td>`;
+                    document.getElementById(footerId).innerHTML = `<td colspan="7" class="px-4 py-2">Month Total: GG: 0 | BWS: 0 | ALL: 0`;
                     return;
                 }
                 
@@ -450,6 +411,7 @@
                     const deleteBtn = document.createElement('button');
                     deleteBtn.className = 'text-red-600 hover:text-red-800 transition text-lg';
                     deleteBtn.innerHTML = '<i class="fa-regular fa-trash-can"></i>';
+                    deleteBtn.title = `Delete all tickets for ${analyst} in ${currentMonth}`;
                     deleteBtn.onclick = () => {
                         if(confirm(`Delete ALL tickets for ${analyst} (${appName}) in ${currentMonth}?`)) {
                             deleteAnalystMonth(currentMonth, appName, analyst);
@@ -474,7 +436,7 @@
                             <span><i class="fa-solid fa-chart-simple mr-2"></i>Month Total:</span>
                             <span class="font-bold">GG: ${totalGG} | BWS: ${totalBWS} | ALL: ${totalGG + totalBWS}</span>
                         </div>
-                      </td>`;
+                    `;
                 }
             }
             
@@ -490,14 +452,12 @@
             monthsList.forEach(m => {
                 const opt = document.createElement('option');
                 opt.value = m;
-                const displayMonth = new Date(m + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
-                opt.textContent = displayMonth;
+                opt.textContent = formatMonthDisplay(m);
                 if(currentMonth === m) opt.selected = true;
                 selector.appendChild(opt);
             });
         }
         
-        // PDF Export Function
         async function exportToPdf() {
             if(!currentMonth) return;
             
@@ -505,39 +465,37 @@
             loadingDiv.style.display = 'flex';
             
             try {
-                const monthDisplay = new Date(currentMonth + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
+                const monthDisplay = formatMonthDisplay(currentMonth);
                 
-                // Get the current table data
                 const analystsSet = new Set();
                 ticketRecords.filter(r => r.monthId === currentMonth).forEach(r => analystsSet.add(r.analyst));
                 globalAnalysts.forEach(a => analystsSet.add(a));
                 const analysts = Array.from(analystsSet).sort();
                 
-                // Build a clean PDF-friendly HTML structure
                 const pdfContent = document.createElement('div');
-                pdfContent.className = 'pdf-export-container';
+                pdfContent.style.padding = '20px';
+                pdfContent.style.fontFamily = 'Inter, sans-serif';
+                pdfContent.style.backgroundColor = 'white';
                 
-                // Header
                 pdfContent.innerHTML = `
-                    <div class="pdf-header">
-                        <div class="pdf-title">BrickWorks IT - Ticket Metrics Report</div>
-                        <div class="pdf-subtitle">${monthDisplay} | Application Team Performance</div>
+                    <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #b4533b; padding-bottom: 15px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #292524;">BrickWorks IT - Ticket Metrics Report</div>
+                        <div style="font-size: 14px; color: #57534e; margin-top: 5px;">${monthDisplay} | Application Team Performance</div>
                         <div style="margin-top: 8px; font-size: 12px; color: #b4533b;">Generated: ${new Date().toLocaleString()}</div>
                     </div>
                 `;
                 
-                // Helper to generate table HTML
-                const generateTableHTML = (appName) => {
-                    let html = `<h3 style="font-size: 18px; font-weight: bold; margin-top: 25px; margin-bottom: 10px; color: #292524;">${appName === 'JDEdwards' ? 'JD Edwards' : 'SalesForce'} Tickets</h3>`;
-                    html += `<table class="pdf-table">
+                const generateTableHTML = (appName, title) => {
+                    let html = `<h3 style="font-size: 18px; font-weight: bold; margin-top: 25px; margin-bottom: 10px; color: #292524;">${title} Tickets</h3>`;
+                    html += `<table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;">
                         <thead>
-                            <tr>
-                                <th>Analyst</th>
-                                <th>Week 1 (GG|BWS)</th>
-                                <th>Week 2 (GG|BWS)</th>
-                                <th>Week 3 (GG|BWS)</th>
-                                <th>Week 4 (GG|BWS)</th>
-                                <th>Total</th>
+                            <tr style="background: #f5f5f4; border: 1px solid #d6d3d1;">
+                                <th style="padding: 10px; text-align: left; border: 1px solid #d6d3d1;">Analyst</th>
+                                <th style="padding: 10px; text-align: center; border: 1px solid #d6d3d1;">Week 1 (GG|BWS)</th>
+                                <th style="padding: 10px; text-align: center; border: 1px solid #d6d3d1;">Week 2 (GG|BWS)</th>
+                                <th style="padding: 10px; text-align: center; border: 1px solid #d6d3d1;">Week 3 (GG|BWS)</th>
+                                <th style="padding: 10px; text-align: center; border: 1px solid #d6d3d1;">Week 4 (GG|BWS)</th>
+                                <th style="padding: 10px; text-align: center; border: 1px solid #d6d3d1;">Total</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -546,44 +504,42 @@
                     for(let analyst of analysts) {
                         let analystTotal = 0;
                         html += `<tr>`;
-                        html += `<td style="text-align: left; font-weight: 500;">${analyst}</td>`;
+                        html += `<td style="padding: 8px; border: 1px solid #d6d3d1; text-align: left; font-weight: 500;">${analyst}</td>`;
                         for(let weekIdx = 0; weekIdx < 4; weekIdx++) {
                             const gg = getCount(currentMonth, appName, analyst, weekIdx, 'GG');
                             const bws = getCount(currentMonth, appName, analyst, weekIdx, 'BWS');
                             analystTotal += (gg + bws);
                             totalGG += gg;
                             totalBWS += bws;
-                            html += `<td>GG: ${gg}<br>BWS: ${bws}</td>`;
+                            html += `<td style="padding: 8px; border: 1px solid #d6d3d1; text-align: center;">GG: ${gg}<br>BWS: ${bws}</td>`;
                         }
-                        html += `<td style="font-weight: bold;">${analystTotal}</td>`;
+                        html += `<td style="padding: 8px; border: 1px solid #d6d3d1; text-align: center; font-weight: bold;">${analystTotal}</td>`;
                         html += `</tr>`;
                     }
                     html += `</tbody>`;
                     html += `<tfoot><tr style="background: #fef3c7; font-weight: bold;">
-                        <td colspan="5">Month Total:</td>
-                        <td>GG: ${totalGG} | BWS: ${totalBWS} | ALL: ${totalGG + totalBWS}</td>
+                        <td colspan="5" style="padding: 10px; border: 1px solid #d6d3d1; text-align: right;">Month Total:</td>
+                        <td style="padding: 10px; border: 1px solid #d6d3d1; text-align: center;">GG: ${totalGG} | BWS: ${totalBWS} | ALL: ${totalGG + totalBWS}</td>
                     </tr></tfoot>`;
                     html += `</table>`;
                     return html;
                 };
                 
-                pdfContent.innerHTML += generateTableHTML('JDEdwards');
-                pdfContent.innerHTML += generateTableHTML('SalesForce');
+                pdfContent.innerHTML += generateTableHTML('JDEdwards', 'JD Edwards');
+                pdfContent.innerHTML += generateTableHTML('SalesForce', 'SalesForce');
                 
-                // Footer
                 pdfContent.innerHTML += `
-                    <div class="pdf-footer">
+                    <div style="margin-top: 30px; text-align: center; font-size: 10px; color: #78716c; border-top: 1px solid #e7e5e4; padding-top: 15px;">
                         <p>BrickWorks Manufacturing | IT Operations Report</p>
                         <p>Data reflects tickets submitted by Glen-Gery (GG) and Brickworks Supply (BWS)</p>
                     </div>
                 `;
                 
-                // PDF options
                 const opt = {
                     margin: [0.5, 0.5, 0.5, 0.5],
                     filename: `BrickWorks_IT_Report_${currentMonth}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, letterRendering: true, useCORS: true },
+                    html2canvas: { scale: 2, letterRendering: true },
                     jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
                 };
                 
@@ -597,7 +553,6 @@
             }
         }
         
-        // Event Handlers
         function addAnalyst() {
             const nameInput = document.getElementById('newAnalystName');
             let name = nameInput.value.trim();
@@ -624,7 +579,7 @@
                 return;
             }
             const analyst = document.getElementById('ticketAnalystSelect').value;
-            if(!analyst || analyst === '-- No analysts, add first --') { alert("Select an analyst"); return; }
+            if(!analyst) { alert("Select an analyst"); return; }
             const app = document.getElementById('ticketAppSelect').value;
             const customer = document.getElementById('ticketCustomerSelect').value;
             let qty = parseInt(document.getElementById('ticketQty').value);
@@ -640,13 +595,13 @@
             monthsList.sort();
             saveData();
             rebuildMonthSelector();
-            alert(`Month ${newMonthVal} added! Select it from dropdown and click "Switch" to view.`);
+            alert(`Month ${formatMonthDisplay(newMonthVal)} added! Select it from dropdown and click "Switch" to view.`);
         }
         
         function handleRemoveMonth() {
             const selectedMonth = document.getElementById('monthSelector').value;
             if(!selectedMonth) { alert("No month selected"); return; }
-            if(confirm(`Are you sure you want to remove month ${selectedMonth} and ALL its tickets? This cannot be undone.`)) {
+            if(confirm(`Are you sure you want to remove ${formatMonthDisplay(selectedMonth)} and ALL its tickets? This cannot be undone.`)) {
                 removeMonth(selectedMonth);
                 rebuildMonthSelector();
             }
