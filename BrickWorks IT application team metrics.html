@@ -37,11 +37,35 @@
             gap: 12px;
             font-weight: 500;
         }
+        .edit-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+        .edit-modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 500px;
+            width: 90%;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
         table {
             border-collapse: collapse;
         }
         th, td {
             border: 1px solid #e5e7eb;
+        }
+        .month-badge {
+            transition: all 0.3s ease;
         }
     </style>
 </head>
@@ -63,7 +87,10 @@
                 <p class="text-stone-500 text-sm mt-1">Application Team • JD Edwards & Salesforce • Ticket Metrics</p>
             </div>
             <div class="mt-2 md:mt-0 flex gap-2">
-                <div class="bg-white/70 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm text-sm font-medium text-stone-700"><i class="fa-regular fa-calendar-alt mr-2 text-amber-700"></i>Live dashboard</div>
+                <div class="bg-white/70 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm text-sm font-medium text-stone-700">
+                    <i class="fa-regular fa-calendar-alt mr-2 text-amber-700"></i>
+                    <span id="globalMonthIndicator">Loading...</span>
+                </div>
             </div>
         </div>
 
@@ -128,7 +155,7 @@
                     <div class="flex gap-2">
                         <input type="month" id="newMonthInput" class="flex-1 border border-stone-300 rounded-xl px-3 py-2 text-sm" value="2026-07">
                         <button id="addMonthBtn" class="bg-emerald-700 hover:bg-emerald-800 text-white px-4 rounded-xl text-sm font-medium flex items-center gap-1"><i class="fa-solid fa-plus"></i> Add</button>
-                        <button id="removeMonthBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 rounded-xl text-sm font-medium flex items-center gap-1"><i class="fa-solid fa-trash"></i> Remove</button>
+                        <button id="removeMonthBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 rounded-xl text-sm font-medium flex items-center gap-1"><i class="fa-solid fa-trash"></i></button>
                     </div>
                     <button id="exportPdfBtn" class="w-full mt-1 bg-purple-700 hover:bg-purple-800 text-white py-2 rounded-xl flex items-center justify-center gap-2 transition text-sm"><i class="fa-regular fa-file-pdf"></i> Export to PDF</button>
                 </div>
@@ -136,13 +163,17 @@
             </div>
         </div>
 
-        <!-- JD Edwards Table - ONLY 4 WEEKS -->
+        <!-- JD Edwards Table with Month Indicator -->
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-stone-200 mb-8">
-            <div class="bg-amber-900/10 px-5 py-4 border-b border-amber-200">
+            <div class="bg-amber-900/10 px-5 py-4 border-b border-amber-200 flex justify-between items-center">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-database text-amber-800 text-xl"></i>
                     <h2 class="font-bold text-xl text-stone-800">JD Edwards Tickets</h2>
                     <span class="bg-amber-100 text-amber-800 text-xs px-3 py-1 rounded-full font-mono ml-3">Application Team</span>
+                </div>
+                <div id="jdeMonthIndicator" class="month-badge bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">
+                    <i class="fa-regular fa-calendar mr-2"></i>
+                    <span>Loading...</span>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -155,7 +186,7 @@
                             <th class="px-3 py-3 text-center font-semibold week-cell">Week 3<br><span class="text-xs font-normal">(GG | BWS)</span></th>
                             <th class="px-3 py-3 text-center font-semibold week-cell">Week 4<br><span class="text-xs font-normal">(GG | BWS)</span></th>
                             <th class="px-3 py-3 text-center font-semibold w-24">Weekly Total</th>
-                            <th class="px-3 py-3 text-center font-semibold w-20">Actions</th>
+                            <th class="px-3 py-3 text-center font-semibold w-28">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="jdeTableBody"></tbody>
@@ -168,13 +199,17 @@
             </div>
         </div>
 
-        <!-- SalesForce Table - ONLY 4 WEEKS -->
+        <!-- SalesForce Table with Month Indicator -->
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-stone-200">
-            <div class="bg-sky-900/10 px-5 py-4 border-b border-sky-200">
+            <div class="bg-sky-900/10 px-5 py-4 border-b border-sky-200 flex justify-between items-center">
                 <div class="flex items-center gap-2">
                     <i class="fa-brands fa-salesforce text-sky-700 text-xl"></i>
                     <h2 class="font-bold text-xl text-stone-800">SalesForce Tickets</h2>
                     <span class="bg-sky-100 text-sky-700 text-xs px-3 py-1 rounded-full font-mono ml-3">Application Team</span>
+                </div>
+                <div id="sfMonthIndicator" class="month-badge bg-sky-100 text-sky-800 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">
+                    <i class="fa-regular fa-calendar mr-2"></i>
+                    <span>Loading...</span>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -187,7 +222,7 @@
                             <th class="px-3 py-3 text-center font-semibold week-cell">Week 3<br><span class="text-xs font-normal">(GG | BWS)</span></th>
                             <th class="px-3 py-3 text-center font-semibold week-cell">Week 4<br><span class="text-xs font-normal">(GG | BWS)</span></th>
                             <th class="px-3 py-3 text-center font-semibold w-24">Weekly Total</th>
-                            <th class="px-3 py-3 text-center font-semibold w-20">Actions</th>
+                            <th class="px-3 py-3 text-center font-semibold w-28">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="sfTableBody"></tbody>
@@ -201,7 +236,7 @@
         </div>
         
         <div class="mt-6 text-center text-xs text-stone-500 bg-stone-100/70 rounded-xl py-2 px-4">
-            📊 Week 1 = 1st, Week 2 = 8th, Week 3 = 15th, Week 4 = 22nd of month | Data persists in browser | Use the delete button to remove all tickets for an analyst in the current month
+            📊 Week 1 = 1st, Week 2 = 8th, Week 3 = 15th, Week 4 = 22nd of month | Click Edit ✏️ to modify GG/BWS counts per week | Click Delete 🗑️ to remove all tickets for an analyst | Month indicators show current viewing month
         </div>
     </div>
 
@@ -214,12 +249,29 @@
 
         const weekLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
         
-        // Format month for display correctly
         function formatMonthDisplay(monthId) {
             if (!monthId) return monthId;
             const [year, month] = monthId.split('-').map(Number);
             const date = new Date(year, month - 1, 1);
             return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+        }
+        
+        // Update all month indicators
+        function updateMonthIndicators() {
+            const formattedMonth = formatMonthDisplay(currentMonth);
+            const jdeIndicator = document.getElementById('jdeMonthIndicator');
+            const sfIndicator = document.getElementById('sfMonthIndicator');
+            const globalIndicator = document.getElementById('globalMonthIndicator');
+            
+            if (jdeIndicator) {
+                jdeIndicator.innerHTML = `<i class="fa-regular fa-calendar mr-2"></i><span>${formattedMonth}</span>`;
+            }
+            if (sfIndicator) {
+                sfIndicator.innerHTML = `<i class="fa-regular fa-calendar mr-2"></i><span>${formattedMonth}</span>`;
+            }
+            if (globalIndicator) {
+                globalIndicator.innerHTML = `<i class="fa-regular fa-calendar-alt mr-2 text-amber-700"></i>${formattedMonth}`;
+            }
         }
         
         function initDefaultData() {
@@ -257,6 +309,7 @@
             }
             if(monthsList.length === 0) monthsList = ["2026-06"];
             if(!currentMonth || !monthsList.includes(currentMonth)) currentMonth = monthsList[0];
+            updateMonthIndicators();
         }
 
         function addTicketRecord(monthId, app, analyst, weekIndex, customer, countToAdd) {
@@ -266,6 +319,22 @@
                 if(ticketRecords[existingIdx].count < 0) ticketRecords[existingIdx].count = 0;
             } else {
                 ticketRecords.push({ monthId, app, analyst, weekIndex, customer, count: countToAdd });
+            }
+            ticketRecords = ticketRecords.filter(r => r.count > 0);
+            saveData();
+            renderTables();
+        }
+
+        function setTicketCount(monthId, app, analyst, weekIndex, customer, newCount) {
+            if (newCount <= 0) {
+                ticketRecords = ticketRecords.filter(r => !(r.monthId === monthId && r.app === app && r.analyst === analyst && r.weekIndex === weekIndex && r.customer === customer));
+            } else {
+                const existingIdx = ticketRecords.findIndex(r => r.monthId === monthId && r.app === app && r.analyst === analyst && r.weekIndex === weekIndex && r.customer === customer);
+                if(existingIdx !== -1) {
+                    ticketRecords[existingIdx].count = newCount;
+                } else {
+                    ticketRecords.push({ monthId, app, analyst, weekIndex, customer, count: newCount });
+                }
             }
             ticketRecords = ticketRecords.filter(r => r.count > 0);
             saveData();
@@ -304,6 +373,7 @@
             renderTables();
             updateRemoveAnalystDropdown();
             updateAnalystDropdowns();
+            updateMonthIndicators();
         }
 
         function getCount(monthId, app, analyst, weekIndex, customer) {
@@ -356,6 +426,62 @@
             }
         }
 
+        // Edit modal functions
+        function openEditModal(appName, analyst, weekIndex, weekLabel) {
+            const ggCount = getCount(currentMonth, appName, analyst, weekIndex, 'GG');
+            const bwsCount = getCount(currentMonth, appName, analyst, weekIndex, 'BWS');
+            
+            const modal = document.createElement('div');
+            modal.className = 'edit-modal';
+            modal.innerHTML = `
+                <div class="edit-modal-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-stone-800">Edit Tickets</h3>
+                        <button class="text-stone-400 hover:text-stone-600" id="closeEditModalBtn"><i class="fa-solid fa-times text-xl"></i></button>
+                    </div>
+                    <div class="border-t border-stone-200 pt-3 mb-4">
+                        <p class="text-stone-600"><span class="font-semibold">Analyst:</span> ${analyst}</p>
+                        <p class="text-stone-600"><span class="font-semibold">Application:</span> ${appName === 'JDEdwards' ? 'JD Edwards' : 'SalesForce'}</p>
+                        <p class="text-stone-600"><span class="font-semibold">Week:</span> ${weekLabel}</p>
+                        <p class="text-stone-600"><span class="font-semibold">Month:</span> ${formatMonthDisplay(currentMonth)}</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-stone-700 mb-1">GG (Glen-Gery) Tickets</label>
+                            <input type="number" id="editGGCount" min="0" value="${ggCount}" class="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-2 focus:ring-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-stone-700 mb-1">BWS (Brickworks Supply) Tickets</label>
+                            <input type="number" id="editBWSCount" min="0" value="${bwsCount}" class="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-2 focus:ring-amber-500">
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mt-6">
+                        <button id="saveEditBtn" class="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2 rounded-xl transition">Save Changes</button>
+                        <button id="cancelEditBtn" class="flex-1 bg-stone-300 hover:bg-stone-400 text-stone-700 font-medium py-2 rounded-xl transition">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            const closeModal = () => modal.remove();
+            
+            document.getElementById('closeEditModalBtn')?.addEventListener('click', closeModal);
+            document.getElementById('cancelEditBtn')?.addEventListener('click', closeModal);
+            document.getElementById('saveEditBtn')?.addEventListener('click', () => {
+                const newGG = parseInt(document.getElementById('editGGCount').value) || 0;
+                const newBWS = parseInt(document.getElementById('editBWSCount').value) || 0;
+                
+                setTicketCount(currentMonth, appName, analyst, weekIndex, 'GG', newGG);
+                setTicketCount(currentMonth, appName, analyst, weekIndex, 'BWS', newBWS);
+                
+                closeModal();
+            });
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+        }
+
         function renderTables() {
             if(!currentMonth) return;
             
@@ -393,11 +519,13 @@
                         weeklyTotal += (ggCount + bwsCount);
                         
                         const td = document.createElement('td');
-                        td.className = 'px-3 py-3 text-center';
+                        td.className = 'px-3 py-3 text-center cursor-pointer hover:bg-stone-100 transition';
                         td.innerHTML = `<div class="flex flex-col items-center gap-0.5">
                             <span class="font-semibold text-amber-700">GG: ${ggCount}</span>
                             <span class="font-semibold text-emerald-700">BWS: ${bwsCount}</span>
                         </div>`;
+                        td.title = `Click to edit week ${weekIdx + 1} tickets`;
+                        td.onclick = () => openEditModal(appName, analyst, weekIdx, weekLabels[weekIdx]);
                         row.appendChild(td);
                     }
                     
@@ -408,16 +536,68 @@
                     
                     const actionCell = document.createElement('td');
                     actionCell.className = 'px-3 py-3 text-center';
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.className = 'text-red-600 hover:text-red-800 transition text-lg';
-                    deleteBtn.innerHTML = '<i class="fa-regular fa-trash-can"></i>';
-                    deleteBtn.title = `Delete all tickets for ${analyst} in ${currentMonth}`;
+                    actionCell.innerHTML = `
+                        <div class="flex gap-2 justify-center">
+                            <button class="edit-ticket-btn text-blue-600 hover:text-blue-800 transition text-lg" title="Edit tickets for this analyst">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </button>
+                            <button class="delete-analyst-btn text-red-600 hover:text-red-800 transition text-lg" title="Delete all tickets for this analyst">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    const editBtn = actionCell.querySelector('.edit-ticket-btn');
+                    const deleteBtn = actionCell.querySelector('.delete-analyst-btn');
+                    
+                    editBtn.onclick = () => {
+                        const weekSelectHtml = `
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-stone-700 mb-1">Select Week to Edit</label>
+                                <select id="weekSelectForEdit" class="w-full px-3 py-2 border border-stone-300 rounded-xl">
+                                    <option value="0">Week 1</option>
+                                    <option value="1">Week 2</option>
+                                    <option value="2">Week 3</option>
+                                    <option value="3">Week 4</option>
+                                </select>
+                            </div>
+                        `;
+                        const tempModal = document.createElement('div');
+                        tempModal.className = 'edit-modal';
+                        tempModal.innerHTML = `
+                            <div class="edit-modal-content">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xl font-bold text-stone-800">Edit Tickets for ${analyst}</h3>
+                                    <button class="text-stone-400 hover:text-stone-600" id="closeTempModal"><i class="fa-solid fa-times text-xl"></i></button>
+                                </div>
+                                ${weekSelectHtml}
+                                <div class="flex gap-3 mt-4">
+                                    <button id="selectWeekBtn" class="flex-1 bg-amber-700 hover:bg-amber-800 text-white font-medium py-2 rounded-xl transition">Continue to Edit</button>
+                                    <button id="cancelTempBtn" class="flex-1 bg-stone-300 hover:bg-stone-400 text-stone-700 font-medium py-2 rounded-xl transition">Cancel</button>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(tempModal);
+                        
+                        const closeTemp = () => tempModal.remove();
+                        document.getElementById('closeTempModal')?.addEventListener('click', closeTemp);
+                        document.getElementById('cancelTempBtn')?.addEventListener('click', closeTemp);
+                        document.getElementById('selectWeekBtn')?.addEventListener('click', () => {
+                            const selectedWeek = parseInt(document.getElementById('weekSelectForEdit').value);
+                            closeTemp();
+                            openEditModal(appName, analyst, selectedWeek, weekLabels[selectedWeek]);
+                        });
+                        tempModal.addEventListener('click', (e) => {
+                            if (e.target === tempModal) closeTemp();
+                        });
+                    };
+                    
                     deleteBtn.onclick = () => {
-                        if(confirm(`Delete ALL tickets for ${analyst} (${appName}) in ${currentMonth}?`)) {
+                        if(confirm(`Delete ALL tickets for ${analyst} (${appName === 'JDEdwards' ? 'JD Edwards' : 'SalesForce'}) in ${formatMonthDisplay(currentMonth)}?`)) {
                             deleteAnalystMonth(currentMonth, appName, analyst);
                         }
                     };
-                    actionCell.appendChild(deleteBtn);
+                    
                     row.appendChild(actionCell);
                     tbody.appendChild(row);
                 }
@@ -614,6 +794,7 @@
                 saveData();
                 renderTables();
                 rebuildMonthSelector();
+                updateMonthIndicators();
             }
         }
         
@@ -633,6 +814,7 @@
             rebuildMonthSelector();
             renderTables();
             updateAnalystDropdowns();
+            updateMonthIndicators();
         }
         
         init();
